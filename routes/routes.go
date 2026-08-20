@@ -14,6 +14,7 @@ import (
 	"github.com/amanhasnainy/bingo-backend/internal/session"
 	"github.com/amanhasnainy/bingo-backend/internal/user"
 	"github.com/amanhasnainy/bingo-backend/internal/playlist"
+	"github.com/amanhasnainy/bingo-backend/internal/feedback"
 )
 
 func SetupRoutes() *gin.Engine {
@@ -53,6 +54,15 @@ func SetupRoutes() *gin.Engine {
 	userRepository := &user.Repository{}
 	sessionRepository := &session.Repository{}
 	playlistRepository := &playlist.Repository{}
+	feedbackRepository := &feedback.Repository{}
+
+	feedbackService := feedback.NewService(
+	feedbackRepository,
+)
+
+feedbackHandler := feedback.NewHandler(
+	feedbackService,
+)
 
 playlistService := playlist.NewService(
 	playlistRepository,
@@ -192,6 +202,16 @@ websocketHandler := websocket.NewHandler(
 			roomHandler.Leave,
 		)
 	}
+
+	feedbackRoutes := api.Group(
+	"/feedback",
+	auth.Middleware(),
+)
+
+feedbackRoutes.POST(
+	"",
+	feedbackHandler.Create,
+)
 
 	return router
 }
